@@ -96,29 +96,31 @@ export class Ghost {
 		return listener
 	}
 
-	runCommand (command) {
+	async runCommand (command) {
 		const matches = []
+		let directive = null
 
 		for (let i = 0; i < this.commands.length; i++) {
-			const c = this.commands[i];
+			const c = this.commands[i]
 			if (c.phrases.filter(p => command.toLowerCase().includes(p)).length > 0) {
 				matches.push(c)
+				if(!directive) directive = c.phrases.filter(p => command.toLowerCase().includes(p))[0]
 			}
 		}
 
 		if (matches.length > 0) {
 			const match = matches[0]
-			const args = (match.args) ? match.args(command) : null
+			const args = (match.args) ? match.args(command, directive) : null
 
 			if (match.action) {
 				match.action(args)
 			}
 
 			if (match.reply) {
-				this.speak(match.reply(args))
+				this.speak(await match.reply(args))
 			}
 
-			console.log("[EVENT] Running command.")
+			console.info("[EVENT] Running command.")
 			
 			return true
 		} else {
