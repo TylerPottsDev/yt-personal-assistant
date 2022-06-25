@@ -40,7 +40,7 @@ const ghost = new Ghost(config, [
 			"tell a joke",
 			"say a joke"
 		],
-		args: command => {
+		reply: () => {
 			const jokes = [
 				"What do you call a fake noodle? An impasta.",
 				"How do you make a tissue dance? You put a little boogie in it.",
@@ -49,12 +49,24 @@ const ghost = new Ghost(config, [
 				"What do you call a cow with no legs? Ground beef."
 			]
 
-			return {
-				joke: jokes[Math.floor(Math.random() * jokes.length)]
-			}
-		},
-		reply: args => {
-			return args.joke
+			return jokes[Math.floor(Math.random() * jokes.length)]
+		}
+	},
+	{
+		name: "sandwich",
+		phrases: [
+			"make me a sandwich",
+			"get in the kitchen and make me a sandwich",
+			"go get me a sandwich"
+		],
+		reply: () => {
+			const responses = [
+				"No, I'm not making you a sandwich you dumb bitch",
+				"How about go fuck yourself?",
+				"Sir, respectfully shut the fuck up"
+			]
+
+			return responses[Math.floor(Math.random() * responses.length)]
 		}
 	}
 ])

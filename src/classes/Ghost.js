@@ -14,6 +14,7 @@ export class Ghost {
 		// Get wake listener results
 		this.wakeListener.onresult = evt => {
 			const result = evt.results[0][0].transcript.toLowerCase().trim()
+			console.log("[EVENT] Wake Word Result: " + result)
 
 			// Check if wakeword is in result
 			if (result.includes(this.WAKEWORD)) {
@@ -21,16 +22,19 @@ export class Ghost {
 				this.wakeListener.stop()
 				
 				// Check if it is a command as well and run it.
-				const isCommand = this.RunCommand(result)
+				const isCommand = this.runCommand(result)
 
 				// If its not a command ask for one.
 				if (!isCommand) {
+					console.log("[INFO] No command found. Asking for one.")
 					this.speak("What is your command, sir?")
 
 					// Listen for command
 					const cmdListener = this.listen({continuous: true})
 
-					const timeout = setTimeout(() => {
+					const interval = setInterval(() => {
+						console.log("[ERROR] No command asked within time. Back into sleep mode.")
+						clearInterval(interval)
 						cmdListener.stop()
 						this.wakeListenerActive = true
 						this.wakeListener.start()
@@ -40,38 +44,49 @@ export class Ghost {
 					// Get command listener results
 					cmdListener.onresult = evt => {
 						const result = evt.results[0][0].transcript.toLowerCase().trim()
-
-						console.log(result);
+						console.log("[EVENT] Command listener result: " + result)
 
 						// Check if command exists and run it
-						const isCMD = this.RunCommand(result)
+						const isCMD = this.runCommand(result)
 
 						// If command exists stop listening for more commands
 						if (isCMD) {
+							console.log("[EVENT] Command ran. Back into sleep mode.")
 							cmdListener.stop()
-							this.wakeListenerActive = true
-							this.wakeListener.start()
-							clearTimeout(timeout)
+							clearInterval(interval)
 						}
 					}
+
+					cmdListener.onend = () => {
+						console.log("[EVENT] CMD Listener ended. Back into sleep mode.")
+						this.wakeListenerActive = true
+						this.wakeListener.start()
+					}
+				} else {
+					this.wakeListenerActive = true
+					this.wakeListener.start()
 				}
 			}
 		}
 
 		// If wake listener is active and it stops, start it again.
 		this.wakeListener.onend = () => {
+			console.log("[EVENT] Wake listener ended.")
 			if (this.wakeListenerActive) {
+				console.log("[EVENT] Wake listener restarting.")
 				this.wakeListener.start()
 			}
 		}
 	}
 
 	speak (text) {
+		console.log("[EVENT] Speaking: " + text)
 		let msg = new SpeechSynthesisUtterance(text)
 		this.speaker.speak(msg)
 	}
 
 	listen (options = {}) {
+		console.log("[EVENT] Listener created.")
 		const listener = new this.sr()
 		listener.lang = this.lang
 		listener.maxAlternatives = options.maxAlternatives || 1
@@ -81,7 +96,7 @@ export class Ghost {
 		return listener
 	}
 
-	RunCommand (command) {
+	runCommand (command) {
 		const matches = []
 
 		for (let i = 0; i < this.commands.length; i++) {
@@ -93,7 +108,7 @@ export class Ghost {
 
 		if (matches.length > 0) {
 			const match = matches[0]
-			const args = match.args(command)
+			const args = (match.args) ? match.args(command) : null
 
 			if (match.action) {
 				match.action(args)
@@ -102,6 +117,8 @@ export class Ghost {
 			if (match.reply) {
 				this.speak(match.reply(args))
 			}
+
+			console.log("[EVENT] Running command.")
 			
 			return true
 		} else {
