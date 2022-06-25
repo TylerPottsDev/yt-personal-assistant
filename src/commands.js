@@ -31,6 +31,7 @@ export default [
 		}
 	},
 	// Tell a joke
+	// Todo: Add a joke database
 	{
 		name: "joke",
 		phrases: [
