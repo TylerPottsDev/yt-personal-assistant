@@ -99,6 +99,7 @@ export default [
 		}
 	},
 	// Play music
+	// Todo: Actually play music, spotify or youtube? :thinking:
 	{
 		name: "play_music",
 		phrases: [
