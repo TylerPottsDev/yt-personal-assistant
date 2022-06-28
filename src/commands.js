@@ -89,7 +89,10 @@ export default [
 				fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=1&srsearch=${args.query}`)
 					.then(res => res.json())
 					.then(data => {
-						const summary = data.query.search[0].snippet.replace('<span class="searchmatch">', "").replace('</span>', "")
+						const summary = data.query.search[0].snippet
+							.replaceAll('<span class="searchmatch">', "")
+							.replaceAll('</span>', "")
+							
 						resolve(`Here is what I found out about ${args.query}. ${summary}`)
 					})
 					.catch(err => {

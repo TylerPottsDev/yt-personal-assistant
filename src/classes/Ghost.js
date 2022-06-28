@@ -5,10 +5,11 @@ export class Ghost {
 		this.commands = commands
 		this.sr = window.SpeechRecognition || window.webkitSpeechRecognition
 		this.speaker = window.speechSynthesis
-		this.wakeListenerActive = true
+		this.wakeListenerActive = false
 	}
 
 	activate () {
+		this.wakeListenerActive = true
 		this.wakeListener = this.listen()
 
 		// Get wake listener results
